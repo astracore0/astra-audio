@@ -27,6 +27,8 @@
     shuffle:'<path d="m16 3 5 4-5 4M3 7h3c4 0 5 10 9 10h6M16 13l5 4-5 4M3 17h3c1.4 0 2.4-1.5 3.3-3"/>',
     repeat:'<path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4m14-1v2a3 3 0 0 1-3 3H3"/>',
     volume:'<path d="M3 9v6h4l5 4V5L7 9H3Z"/><path d="M16 9a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/>',
+    settings:'<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.1.9-1.5 2.6-1.4-.6a7.8 7.8 0 0 1-1.6.9l-.2 1.5h-3l-.3-1.5a7.8 7.8 0 0 1-1.6-.9l-1.4.6-1.5-2.6 1.1-.9a7.4 7.4 0 0 1 0-1.9l-1.1-.9 1.5-2.6 1.4.6a7.8 7.8 0 0 1 1.6-.9l.3-1.5h3l.2 1.5a7.8 7.8 0 0 1 1.6.9l1.4-.6 1.5 2.6-1.1.9a7.4 7.4 0 0 1-.1 1.8Z"/>',
+    download:'<path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v3h14v-3"/>',
     'heart-filled':'<path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 8.8 2.5Z" fill="currentColor"/>'
   };
   $$('[data-icon]').forEach(el => { const name=el.dataset.icon; if(ICONS[name]) el.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`; });
@@ -51,6 +53,7 @@
       <div class="track-meta"><div class="track-title" title="${esc(t.title)}">${esc(t.title)}</div><div class="track-sub">${esc(t.artist)}</div><div class="track-album">${esc(t.album || (hasPreview?'Preview available':'No preview available'))}</div></div>
       <div class="track-actions">
         <button class="small-icon ${isSaved?'saved':''}" data-action="save" aria-label="${isSaved?'Remove from':'Save to'} library" title="${isSaved?'Remove from library':'Save to library'}"><svg viewBox="0 0 24 24">${isSaved?ICONS['heart-filled']:ICONS.heart}</svg></button>
+        <button class="small-icon" data-action="download" aria-label="Download available preview" title="Download available preview" ${hasPreview?'':'disabled'}><svg viewBox="0 0 24 24">${ICONS.download}</svg></button>
         ${queueMode?'<button class="small-icon" data-action="remove" aria-label="Remove from queue" title="Remove from queue"><svg viewBox="0 0 24 24">'+ICONS.close+'</svg></button>':`<button class="small-icon" data-action="queue" aria-label="Add to queue" title="Add to queue"><svg viewBox="0 0 24 24">${ICONS.plus}</svg></button><button class="small-icon" data-action="add-playlist" aria-label="Add to playlist" title="Add to playlist"><svg viewBox="0 0 24 24">${ICONS.playlist}</svg></button>`}
         <button class="play-small-button" data-action="play" aria-label="${hasPreview?'Play':'Preview unavailable'}" ${hasPreview?'':'disabled'}><svg viewBox="0 0 24 24">${ICONS.play}</svg></button>
       </div>
@@ -197,7 +200,7 @@
     const button=event.target.closest('[data-action]');if(!button)return;
     const card=button.closest('.track-card');if(card){
       const t=card._track||getTrackById(card.dataset.track);if(!t)return;
-      switch(button.dataset.action){case'play':playTrack(t);break;case'save':saveTrack(t);break;case'queue':addQueue(t);break;case'add-playlist':{
+      switch(button.dataset.action){case'play':playTrack(t);break;case'save':saveTrack(t);break;case'download':downloadTrackPreview(t);break;case'queue':addQueue(t);break;case'add-playlist':{
         if(!playlists.length){toast('Create a playlist first.');showView('playlists');return;}
         const choices=playlists.map((p,i)=>`${i+1}. ${p.name}`).join('\\n');
         const answer=prompt(`Add "${t.title}" to which playlist?\\n${choices}\\nEnter a number:`);
@@ -230,6 +233,46 @@
     e.preventDefault();const name=$('#playlistName').value.trim();if(!name)return;
     playlists.push({id:`p-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name,tracks:[]});store.set('playlists',playlists);$('#playlistName').value='';renderPlaylists();toast('Playlist created');
   });
+  async function downloadTrackPreview(track){
+    if(!track?.preview){toast('This track has no available preview.');return;}
+    const safeName=(track.title+' - '+track.artist).replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,100)||'astra-audio-preview';
+    try{
+      const response=await fetch(track.preview, {mode:'cors'});
+      if(!response.ok)throw new Error('Preview download unavailable');
+      const blob=await response.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=safeName+'.m4a';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+      toast('Downloading the available preview');
+    }catch{
+      window.open(track.preview,'_blank','noopener');
+      toast('Opened the preview. Direct download depends on provider permissions.');
+    }
+  }
+  async function downloadCurrentPreview(){
+    if(!current){toast('Play a track with an available preview first.');return;}
+    await downloadTrackPreview(current);
+  }
+  $('#downloadCurrent').addEventListener('click',downloadCurrentPreview);
+  $('#defaultVolume').value=store.get('defaultVolume',0.8);
+  audio.volume=Number($('#defaultVolume').value);
+  $('#defaultVolumeValue').textContent=Math.round(audio.volume*100)+'%';
+  $('#defaultVolume').addEventListener('input',e=>{
+    audio.volume=Number(e.target.value);$('#volumeBar').value=e.target.value;
+    $('#defaultVolumeValue').textContent=Math.round(audio.volume*100)+'%';
+    store.set('defaultVolume',audio.volume);
+  });
+  $('#settingsCountry').value=store.get('country','in');
+  $('#settingsCountry').addEventListener('change',e=>{
+    store.set('country',e.target.value);$('#countrySelect').value=e.target.value;
+    if($('#view-trending').classList.contains('active'))loadCharts();
+    toast('Chart region updated');
+  });
+  $('#clearLocalData').addEventListener('click',()=>{
+    if(!confirm('Clear your saved library and playlists from this browser? This cannot be undone.'))return;
+    saved=[];playlists=[];store.set('library',saved);store.set('playlists',playlists);renderLibrary();renderPlaylists();toast('Local library and playlists cleared');
+  });
+  $('#settingsAbout').addEventListener('click',()=>$('#modalBackdrop').classList.add('open'));
   $('#clearQueue').addEventListener('click',()=>{queue=[];queueIndex=-1;renderQueue();toast('Queue cleared');});
   $('#playButton').addEventListener('click',togglePlay);
   $('#previousButton').addEventListener('click',()=>{if(audio.currentTime>3){audio.currentTime=0;}else playNext(-1);});
@@ -240,7 +283,7 @@
   $('#openQueue').addEventListener('click',()=>showView('queue'));
   $('#volumeBar').addEventListener('input',e=>audio.volume=Number(e.target.value));
   $('#seekBar').addEventListener('input',e=>{if(Number.isFinite(audio.duration))audio.currentTime=Number(e.target.value);});
-  audio.volume=.8;
+  audio.volume=Number(store.get('defaultVolume',0.8));$('#volumeBar').value=audio.volume;
   audio.addEventListener('timeupdate',()=>{$('#seekBar').max=Number.isFinite(audio.duration)?audio.duration:30;$('#seekBar').value=audio.currentTime||0;$('#currentTime').textContent=fmt(audio.currentTime);$('#durationTime').textContent=fmt(audio.duration);});
   audio.addEventListener('play',()=>setPlayerIcon(true));audio.addEventListener('pause',()=>setPlayerIcon(false));
   audio.addEventListener('ended',()=>{if(repeat){audio.currentTime=0;audio.play();}else if(queue.length)playNext(1);else setPlayerIcon(false);});
