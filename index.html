@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -1081,10 +1082,76 @@
           album: item.album?.name || item.album || '',
           art: bestImg,
           fullStream: bestAudio,
-          preview: bestAudio,
+          preview: '', // Do not attach preview audio in advance
           duration: durationSeconds,
           source: 'saavn'
         };
+      }
+
+      function cleanITunesTrack(t) {
+        const durationSeconds = t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 0;
+        return {
+          id: String(t.trackId || ''),
+          title: t.trackName || 'Untitled Track',
+          artist: t.artistName || 'Unknown Artist',
+          album: t.collectionName || '',
+          art: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '500x500bb') : FALLBACK,
+          preview: '', // Left unloaded until clicked
+          rawPreview: t.previewUrl || '',
+          fullStream: '',
+          duration: durationSeconds,
+          source: 'itunes'
+        };
+      }
+
+      async function searchFullSongs(term, limit = 25) {
+        const cacheKey = `search_${term.toLowerCase().trim()}`;
+        const cached = store.get(cacheKey, null);
+        if (cached && Array.isArray(cached) && cached.length) return cached;
+
+        // Try direct high-quality metadata API
+        for (const mirror of SAAVN_MIRRORS) {
+          try {
+            const data = await fetchWithTimeout(`${mirror}/search/songs?query=${encodeURIComponent(term)}&limit=${limit}`);
+            const results = (data.data?.results || data.results || []).map(cleanSaavnTrack).filter(t => t.id && t.fullStream);
+            if (results.length) {
+              store.set(cacheKey, results.slice(0, 24));
+              return results;
+            }
+          } catch (e) {}
+        }
+
+        // Fallback to iTunes metadata search (Audio stays unloaded)
+        try {
+          const itunesData = await fetchWithTimeout(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=${limit}`);
+          const results = (itunesData.results || []).map(cleanITunesTrack).filter(t => t.id);
+          if (results.length) {
+            store.set(cacheKey, results.slice(0, 24));
+            return results;
+          }
+        } catch (e) {}
+
+        return [];
+      }
+
+      async function resolveStream(track) {
+        // Only fetch/resolve actual audio stream when user explicitly clicks the track
+        if (track.fullStream) return track.fullStream;
+
+        const q = `${track.title} ${track.artist}`.trim();
+        for (const mirror of SAAVN_MIRRORS) {
+          try {
+            const data = await fetchWithTimeout(`${mirror}/search/songs?query=${encodeURIComponent(q)}&limit=3`);
+            const items = (data.data?.results || data.results || []).map(cleanSaavnTrack).filter(t => t.fullStream);
+            if (items.length) {
+              track.fullStream = items[0].fullStream;
+              if (items[0].duration) track.duration = items[0].duration;
+              return track.fullStream;
+            }
+          } catch (e) {}
+        }
+
+        return track.rawPreview || track.preview || '';
       }
 
       function cleanITunesTrack(t) {
@@ -1407,6 +1474,7 @@
 
           updatePlayer(track);
 
+          // On-demand fetch of stream URL only for the clicked track
           const streamUrl = await resolveStream(track);
           if (!streamUrl) throw new Error('No stream found');
 
@@ -1414,8 +1482,10 @@
             await audioContext.resume();
           }
 
+          // Full load only for this track
           if (audio.src !== streamUrl) {
             audio.src = streamUrl;
+            audio.load();
           }
 
           await audio.play();
@@ -1717,3 +1787,4 @@
   </script>
 </body>
 </html>
+```
