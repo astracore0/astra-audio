@@ -108,25 +108,29 @@
     'https://jiosaavn-api-privatecvc2.vercel.app'
   ];
 
-  async function fetchWithTimeout(url, ms = 7000) {
+  async function fetchWithTimeout(url, ms = 3500, signal) {
     const controller = new AbortController();
+    const abort = () => controller.abort();
     const timer = setTimeout(() => controller.abort(), ms);
+    if (signal) {
+      if (signal.aborted) controller.abort();
+      else signal.addEventListener('abort', abort, { once: true });
+    }
     try {
       const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timer);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
-    } catch (e) {
+    } finally {
       clearTimeout(timer);
-      throw e;
+      signal?.removeEventListener('abort', abort);
     }
   }
 
   function cleanSaavnTrack(t) {
     const dUrls = t.downloadUrl || [];
-    const bestUrl = (dUrls.find(u => u.quality === '320kbps') || dUrls.find(u => u.quality === '160kbps') || dUrls[dUrls.length - 1])?.url || '';
+    const bestUrl = (dUrls.find(u => u.quality === '160kbps') || dUrls.find(u => u.quality === '320kbps') || dUrls[dUrls.length - 1])?.url || '';
     const imgUrls = t.image || [];
-    const bestImg = (imgUrls.find(i => i.quality === '500x500') || imgUrls[imgUrls.length - 1])?.url || FALLBACK;
+    const bestImg = (imgUrls.find(i => i.quality === '150x150') || imgUrls.find(i => i.quality === '500x500') || imgUrls[imgUrls.length - 1])?.url || FALLBACK;
 
     return {
       id: String(t.id || ''),
@@ -139,27 +143,62 @@
     };
   }
 
+  async function firstSaavnResult(urlFor, parseResults, timeout = 3500, signal) {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal) {
+      if (signal.aborted) controller.abort();
+      else signal.addEventListener('abort', abort, { once: true });
+    }
+    const requests = STREAM_APIS.map(async base => {
+      const data = await fetchWithTimeout(urlFor(base), timeout, controller.signal);
+      const tracks = parseResults(data);
+      if (!tracks.length) throw new Error('No tracks returned');
+      return tracks;
+    });
+
+    try {
+      return await Promise.any(requests);
+    } finally {
+      signal?.removeEventListener('abort', abort);
+      controller.abort();
+    }
+  }
+
+  async function searchItunes(query, limit, signal) {
+    const data = await fetchWithTimeout(
+      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=${limit}`,
+      5000,
+      signal
+    );
+    return (data.results || []).map(t => ({
+      id: String(t.trackId),
+      title: t.trackName || 'Untitled',
+      artist: t.artistName || 'Unknown Artist',
+      album: t.collectionName || '',
+      art: t.artworkUrl100 || FALLBACK,
+      fullStream: t.previewUrl || '',
+      duration: t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 0
+    })).filter(t => t.id);
+  }
+
   /* Real Trending Hits via JioSaavn Trending API */
   async function fetchRealHypeTracks() {
     const cached = store.get('hype_cache', null);
     if (cached && cached.length) return cached;
 
-    for (const base of STREAM_APIS) {
-      try {
-        const data = await fetchWithTimeout(`${base}/modules?language=hindi,punjabi,english`, 6000);
-        const trendingList = data.data?.trending?.songs || data.data?.albums || [];
-        if (trendingList.length) {
-          const songs = trendingList.map(cleanSaavnTrack).filter(t => t.id && t.title);
-          if (songs.length) {
-            store.set('hype_cache', songs);
-            return songs;
-          }
-        }
-      } catch (e) {}
+    try {
+      const songs = await firstSaavnResult(
+        base => `${base}/modules?language=hindi,punjabi,english`,
+        data => (data.data?.trending?.songs || []).map(cleanSaavnTrack).filter(t => t.id && t.title)
+      );
+      store.set('hype_cache', songs);
+      return songs;
+    } catch (error) {
+      // Search and iTunes are the fallback when both trending feeds are unavailable.
     }
 
-    // Direct Hype search query fallback
-    return await searchMusicTracks('Trending Bollywood Punjabi Hits', 25);
+    return searchMusicTracks('Trending Bollywood Punjabi Hits', 25);
   }
 
   /* Search Engine: Matches Song Titles, Lyrics, or Artists */
@@ -168,60 +207,50 @@
     const cached = store.get(cacheKey, null);
     if (cached && cached.length) return cached;
 
-    for (const base of STREAM_APIS) {
-      try {
-        const data = await fetchWithTimeout(`${base}/search/songs?query=${encodeURIComponent(query)}&limit=${limit}`, 6000);
-        const results = data.data?.results || data.results || [];
-        if (results.length) {
-          const songs = results.map(cleanSaavnTrack).filter(t => t.id && t.title);
-          if (songs.length) {
-            store.set(cacheKey, songs);
-            return songs;
-          }
-        }
-      } catch (e) {}
-    }
-
-    // iTunes direct search fallback if Saavn instances are busy
+    const controller = new AbortController();
+    const saavnResults = firstSaavnResult(
+      base => `${base}/search/songs?query=${encodeURIComponent(query)}&limit=${limit}`,
+      data => (data.data?.results || data.results || []).map(cleanSaavnTrack).filter(t => t.id && t.title),
+      3500,
+      controller.signal
+    );
+    const itunesResults = searchItunes(query, limit, controller.signal);
+    let songs = [];
     try {
-      const itunesData = await fetchWithTimeout(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=${limit}`, 6000);
-      const songs = (itunesData.results || []).map(t => ({
-        id: String(t.trackId),
-        title: t.trackName || 'Untitled',
-        artist: t.artistName || 'Unknown Artist',
-        album: t.collectionName || '',
-        art: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '500x500bb') : FALLBACK,
-        fullStream: t.previewUrl || '',
-        duration: t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 0
-      })).filter(t => t.id);
-
-      if (songs.length) {
-        store.set(cacheKey, songs);
-        return songs;
-      }
-    } catch (e) {}
-
-    return [];
+      songs = await Promise.any([saavnResults, itunesResults].map(request =>
+        request.then(results => {
+          if (!results.length) throw new Error('No tracks returned');
+          return results;
+        })
+      ));
+    } catch (error) {
+      songs = [];
+    } finally {
+      controller.abort();
+    }
+    if (songs.length) store.set(cacheKey, songs);
+    return songs;
   }
 
-  /* Lazy Stream Resolver: Fetches 320kbps full stream on user click only */
+  /* Resolve full streams only when a selected track needs one. */
   async function resolveStreamUrl(track) {
     if (track.fullStream) return track.fullStream;
 
     const q = `${track.title} ${track.artist}`.trim();
-    for (const base of STREAM_APIS) {
-      try {
-        const data = await fetchWithTimeout(`${base}/search/songs?query=${encodeURIComponent(q)}&limit=1`, 4500);
-        const item = (data.data?.results || data.results || [])[0];
-        if (item) {
-          const cleaned = cleanSaavnTrack(item);
-          if (cleaned.fullStream) {
-            track.fullStream = cleaned.fullStream;
-            if (cleaned.duration) track.duration = cleaned.duration;
-            return track.fullStream;
-          }
-        }
-      } catch (e) {}
+    try {
+      const results = await firstSaavnResult(
+        base => `${base}/search/songs?query=${encodeURIComponent(q)}&limit=1`,
+        data => (data.data?.results || data.results || []).map(cleanSaavnTrack).filter(t => t.fullStream),
+        3000
+      );
+      const match = results[0];
+      if (match) {
+        track.fullStream = match.fullStream;
+        if (match.duration) track.duration = match.duration;
+        return track.fullStream;
+      }
+    } catch (error) {
+      // Fall back to an available preview if no full stream can be resolved.
     }
     return track.previewUrl || '';
   }
