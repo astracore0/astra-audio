@@ -1,24 +1,27 @@
 # Astra Audio
 
-A responsive, static music player for GitHub Pages. The app runs entirely in the browser and needs no build tools, server, account, or API key.
+Astra Audio is a small, ad-free, client-side music player for GitHub Pages. It has no backend, account, subscription, API key, build step, or external CSS/icon dependency.
 
-## What it plays
+## Music and licensing
 
-- **Your audio files:** Import files you own or are authorized to play. They are stored in this browser's IndexedDB and can play at full length. Files are not uploaded. Clearing browser site data removes the local copies.
-- **Catalogue previews:** Search the public Apple iTunes Search API for track, artist, and album metadata, including catalogue duration where available. Search supports normalized title, artist, and album matching; it does not search lyrics. When available, the player can play Apple's short preview clip. A preview is not a full song; this app does not use third-party stream proxies or obtain full tracks from unlicensed sources.
-- **Local library and queue:** Save tracks, add tracks to the queue, and keep preferences, current track, and playback position in this browser's local storage. Local file contents use IndexedDB. Browser storage is not synced across devices.
+Search and radio use the Wikimedia Commons API and show tracks marked with an open license or public-domain status. Each result links to its Commons source and license when available. Check the source page for the exact terms and attribution requirements before reusing or redistributing a recording.
 
-Catalogue search does not search lyrics. Lyrics search requires an authorized lyrics provider and is not configured.
+This is an open-music catalogue, not a way to stream every commercial release. Catalogue availability, playback formats, and regional access depend on the source and your browser. The app is free and contains no advertising.
 
-## Run locally
+## Features
 
-Open `index.html` in a modern browser or serve the repository root as static files. For GitHub Pages, select **GitHub Actions** as the Pages source; `.github/workflows/pages.yml` publishes the repository.
+- Search track titles, contributors, instruments, moods, and descriptions with local token-based ranking.
+- Browse mood shortcuts, save favourites, and build a playback queue.
+- Continue with related open tracks using radio when the queue is empty.
+- Stream only after the listener presses Play; search requests track metadata and artwork, not audio.
+- Seek through a track, see playback/buffer progress, and control volume.
+- Restore the selected section, query, scroll position, saved tracks, queue, and player selection from this browser's local storage.
+- Uses inline SVG icons and embedded responsive CSS; the page is a single `index.html`.
 
-The app is a single self-contained `index.html`: styling and JavaScript are inline. Catalogue search and artwork use Apple's public services; metadata requests time out after 4.5 seconds, and preview audio is requested only after Play is pressed.
+Search is not generative AI and does not send queries to an AI provider. Ranking runs in the browser, avoiding AI API keys, costs, and disclosure of search terms to an additional service.
 
-## Limitations
+## Run and publish
 
-- Catalogue results and previews depend on the Apple API, network access, and regional availability.
-- Full-length playback is available for user-selected local audio only, unless a properly licensed provider is integrated.
-- Imported audio is stored on the current browser/device and can consume browser storage quota.
-- Search metadata and preview URLs are retrieved on demand; audio is assigned to the player only after the user presses Play.
+Open `index.html` in a modern browser or serve the repository as static files. For GitHub Pages, select **GitHub Actions** as the Pages source; `.github/workflows/pages.yml` publishes the site.
+
+The site needs an internet connection to search Commons and retrieve remote audio. Search calls time out after 4.5 seconds and show an error instead of leaving a spinner running.
