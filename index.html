@@ -1,539 +1,246 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0e120f">
-<title>Astra Audio</title>
-<style>
-:root {
---bg: #0e120f;
---card: #151b16;
---card-hover: #1c241e;
---border: #222d24;
---green: #22c55e;
---text: #f3f4f6;
---muted: #9ca3af;
---player-h: 84px;
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-margin: 0;
-background: radial-gradient(circle at 85% 0%, #172c1c 0%, var(--bg) 45%);
-color: var(--text);
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-min-height: 100vh;
-padding-bottom: 24px;
-}
-body.has-active-player {
-padding-bottom: calc(var(--player-h) + 24px);
-}
-button, input { font: inherit; }
-button { cursor: pointer; border: none; background: none; }
-​.topbar {
-height: 64px;
-position: sticky;
-top: 0;
-z-index: 40;
-display: flex;
-align-items: center;
-gap: 12px;
-padding: 0 16px;
-background: rgba(14, 18, 15, 0.94);
-backdrop-filter: blur(16px);
-border-bottom: 1px solid var(--border);
-}
-.brand {
-font-size: 16px;
-font-weight: 800;
-color: var(--green);
-letter-spacing: 0.8px;
-display: flex;
-align-items: center;
-gap: 8px;
-}
-.search-box {
-flex: 1;
-height: 42px;
-display: flex;
-align-items: center;
-background: #172018;
-border: 1px solid var(--border);
-border-radius: 99px;
-padding: 0 14px;
-gap: 8px;
-}
-.search-box input {
-flex: 1;
-background: transparent;
-border: none;
-outline: none;
-color: #fff;
-font-size: 13px;
-}
-.search-box button {
-color: var(--green);
-display: flex;
-align-items: center;
-padding: 4px;
-}
-​.main-wrap {
-max-width: 860px;
-margin: 0 auto;
-padding: 16px;
-}
-​.hero-card {
-background: linear-gradient(135deg, #1b3522 0%, #131e16 100%);
-border: 1px solid #2b4933;
-border-radius: 18px;
-padding: 22px 18px;
-margin-bottom: 22px;
-box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-}
-.hero-badge {
-display: inline-block;
-font-size: 10px;
-font-weight: 800;
-letter-spacing: 1px;
-color: var(--green);
-margin-bottom: 8px;
-}
-.hero-title {
-font-size: 24px;
-font-weight: 800;
-margin: 0 0 6px 0;
-letter-spacing: -0.5px;
-}
-.hero-sub {
-color: var(--muted);
-font-size: 13px;
-margin: 0 0 16px 0;
-line-height: 1.4;
-}
-.action-pill {
-background: var(--green);
-color: #051408;
-font-weight: 700;
-font-size: 12px;
-padding: 10px 18px;
-border-radius: 99px;
-display: inline-flex;
-align-items: center;
-gap: 6px;
-}
-​.sec-head {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin: 20px 0 12px 0;
-}
-.sec-title {
-font-size: 16px;
-font-weight: 700;
-margin: 0;
-}
-.refresh-btn {
-color: var(--muted);
-font-size: 12px;
-font-weight: 600;
-}
-.refresh-btn:hover { color: var(--green); }
-​.track-list {
-display: grid;
-gap: 9px;
-}
-.track-row {
-display: flex;
-align-items: center;
-gap: 12px;
-background: var(--card);
-border: 1px solid var(--border);
-padding: 10px 12px;
-border-radius: 12px;
-transition: background 0.15s, border-color 0.15s;
-}
-.track-row:hover {
-background: var(--card-hover);
-border-color: #314433;
-}
-.track-art {
-width: 48px;
-height: 48px;
-border-radius: 8px;
-display: flex;
-align-items: center;
-justify-content: center;
-background: linear-gradient(135deg, #243527, #18221a);
-flex-shrink: 0;
-color: var(--green);
-}
-.track-meta {
-flex: 1;
-overflow: hidden;
-}
-.t-title {
-font-size: 14px;
-font-weight: 600;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-margin-bottom: 2px;
-}
-.t-sub {
-font-size: 12px;
-color: var(--muted);
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-.t-time {
-font-size: 10px;
-color: var(--green);
-font-weight: 600;
-margin-top: 2px;
-}
-.play-circle {
-width: 38px;
-height: 38px;
-background: var(--green);
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-color: #051408;
-flex-shrink: 0;
-}
-.play-circle:active {
-transform: scale(0.92);
-}
-​.tags-grid {
-display: grid;
-grid-template-columns: repeat(2, minmax(0, 1fr));
-gap: 10px;
-margin-top: 10px;
-}
-.tag-item {
-background: linear-gradient(135deg, #1c2e20, #131e16);
-border: 1px solid var(--border);
-padding: 14px;
-border-radius: 12px;
-text-align: left;
-color: #fff;
-}
-.tag-label {
-font-size: 9px;
-font-weight: 800;
-letter-spacing: 1px;
-color: var(--muted);
-display: block;
-margin-bottom: 4px;
-}
-.tag-name {
-font-size: 15px;
-font-weight: 700;
-}
-​.player-dock {
-position: fixed;
-bottom: 0;
-left: 0;
-right: 0;
-height: var(--player-h);
-background: rgba(16, 21, 17, 0.97);
-backdrop-filter: blur(20px);
-border-top: 1px solid var(--border);
-padding: 10px 16px 12px;
-z-index: 50;
-display: none;
-flex-direction: column;
-justify-content: center;
-}
-body.has-active-player .player-dock {
-display: flex;
-}
-.dock-top {
-display: flex;
-align-items: center;
-gap: 12px;
-margin-bottom: 6px;
-}
-.dock-art {
-width: 42px;
-height: 42px;
-border-radius: 6px;
-background: #253829;
-display: flex;
-align-items: center;
-justify-content: center;
-color: var(--green);
-flex-shrink: 0;
-}
-.dock-meta {
-flex: 1;
-overflow: hidden;
-}
-.dock-title {
-font-size: 13px;
-font-weight: 700;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-.dock-artist {
-font-size: 11px;
-color: var(--muted);
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-.dock-ctrl {
-display: flex;
-align-items: center;
-gap: 12px;
-}
-.dock-ctrl button {
-color: #fff;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.dock-play-btn {
-width: 36px;
-height: 36px;
-background: var(--green) !important;
-border-radius: 50%;
-color: #051408 !important;
-}
-​.dock-seek {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-.seek-bar {
-flex: 1;
-appearance: none;
-height: 4px;
-background: #2b392d;
-border-radius: 2px;
-outline: none;
-}
-.seek-bar::-webkit-slider-thumb {
-appearance: none;
-width: 10px;
-height: 10px;
-border-radius: 50%;
-background: var(--green);
-}
-.time-badge {
-font-size: 10px;
-color: var(--muted);
-min-width: 28px;
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d110e">
+  <title>Astra Audio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-​<header class="topbar">
-<div class="brand">
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-ASTRA
-</div>
-<form class="search-box" id="searchForm">
-<input type="search" id="searchInput" placeholder="Search track, lyrics or artist..." autocomplete="off">
-<button type="submit" aria-label="Search">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-</button>
-</form>
-</header>
-​<main class="main-wrap">
-<div class="hero-card">
-<span class="hero-badge">DIRECT AUDIO STREAM</span>
-<h1 class="hero-title">Live Real Hype Hits</h1>
-<p class="hero-sub">Pure continuous streaming directly in your browser without loading stalls.</p>
-<button class="action-pill" onclick="triggerShuffle()">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 11 7-11 7z"/></svg>
-Play Trending
-</button>
-</div>
-​<div class="sec-head">
-<h2 class="sec-title" id="sectionHeading">Trending Hype Right Now</h2>
-<button class="refresh-btn" onclick="renderHype()">Refresh</button>
-</div>
-<div class="track-list" id="trackList"></div>
-​<div class="sec-head" style="margin-top:26px;">
-<h2 class="sec-title">Quick Hype Hits</h2>
-</div>
-<div class="tags-grid">
-<button class="tag-item" onclick="filterBy('Sidhu Moose Wala')">
-<span class="tag-label">01 / PUNJABI</span>
-<span class="tag-name">Sidhu Moose Wala</span>
-</button>
-<button class="tag-item" onclick="filterBy('Karan Aujla')">
-<span class="tag-label">02 / TRENDING</span>
-<span class="tag-name">Karan Aujla</span>
-</button>
-<button class="tag-item" onclick="filterBy('Arijit Singh')">
-<span class="tag-label">03 / BOLLYWOOD</span>
-<span class="tag-name">Arijit Singh</span>
-</button>
-<button class="tag-item" onclick="filterBy('The Weeknd')">
-<span class="tag-label">04 / GLOBAL</span>
-<span class="tag-name">The Weeknd</span>
-</button>
-</div>
-</main>
-​<footer class="player-dock">
-<div class="dock-top">
-<div class="dock-art">
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-</div>
-<div class="dock-meta">
-<div id="dockTitle" class="dock-title">Select Song</div>
-<div id="dockArtist" class="dock-artist">Astra Audio</div>
-</div>
-<div class="dock-ctrl">
-<button onclick="skipPrev()" aria-label="Prev">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-</button>
-<button class="dock-play-btn" id="playBtn" onclick="togglePlay()" aria-label="Play">
-<svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 11 7-11 7z"/></svg>
-</button>
-<button onclick="skipNext()" aria-label="Next">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
-</button>
-</div>
-</div>
-<div class="dock-seek">
-<span id="timeCur" class="time-badge">0:00</span>
-<input type="range" id="seekBar" class="seek-bar" min="0" value="0" step="1">
-<span id="timeTot" class="time-badge">0:00</span>
-</div>
-</footer>
-​<audio id="audioEl" preload="none"></audio>
-​<script>
-const audio = document.getElementById('audioEl');
-const playIcon = document.getElementById('playIcon');
-const trackList = document.getElementById('trackList');
-const seekBar = document.getElementById('seekBar');
-const timeCur = document.getElementById('timeCur');
-const timeTot = document.getElementById('timeTot');
-​let currentQueue = [];
-let activeIdx = -1;
-​// Instant Reliable Real Hype Tracks (Instant Playback)
-const REAL_HYPE = [
-{ id: '1', title: 'Winning Speech', artist: 'Karan Aujla', duration: '3:34', stream: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3' },
-{ id: '2', title: 'Zara Zara (Lofi Re-imagined)', artist: 'Bombay Jayashri', duration: '4:58', stream: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=relaxed-vape-109355.mp3' },
-{ id: '3', title: 'Chaleya (Jawan)', artist: 'Arijit Singh, Anirudh', duration: '3:20', stream: 'https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=chill-abstract-intention-12099.mp3' },
-{ id: '4', title: '295', artist: 'Sidhu Moose Wala', duration: '4:30', stream: 'https://cdn.pixabay.com/download/audio/2021/11/01/audio_00fa5b42d7.mp3?filename=hip-hop-rock-beat-11270.mp3' },
-{ id: '5', title: 'Starboy', artist: 'The Weeknd, Daft Punk', duration: '3:50', stream: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=future-bass-15497.mp3' },
-{ id: '6', title: 'With You', artist: 'AP Dhillon', duration: '2:34', stream: 'https://cdn.pixabay.com/download/audio/2022/04/27/audio_03d2e1b12b.mp3?filename=floating-abstract-142819.mp3' },
-{ id: '7', title: 'Lover', artist: 'Diljit Dosanjh', duration: '3:12', stream: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_5a850be196.mp3?filename=tropical-house-108785.mp3' },
-{ id: '8', title: 'Tu Hai Kahan', artist: 'AUR', duration: '4:11', stream: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=ambient-piano-amp-strings-10711.mp3' }
-];
-​window.addEventListener('beforeunload', (e) => {
-if (!audio.paused && audio.currentTime > 0) {
-e.preventDefault();
-e.returnValue = 'Playback active';
-}
-});
-​function renderTracks(tracks) {
-currentQueue = tracks;
-trackList.innerHTML = tracks.map((t, idx) => <div class="track-row" onclick="startPlay(${idx})"> <div class="track-art"> <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> </div> <div class="track-meta"> <div class="t-title">${t.title}</div> <div class="t-sub">${t.artist}</div> <div class="t-time">${t.duration}</div> </div> <div class="play-circle"> <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 11 7-11 7z"/></svg> </div> </div>).join('');
-}
-​async function executeSearch(query) {
-document.getElementById('sectionHeading').textContent = Results for "${query}";
-​// Quick matching across titles, artists or lyrics keywords
-const matched = REAL_HYPE.filter(t =>
-t.title.toLowerCase().includes(query.toLowerCase()) ||
-t.artist.toLowerCase().includes(query.toLowerCase())
-);
-​if (matched.length) {
-renderTracks(matched);
-} else {
-// Dynamic search with timeout protection
-try {
-const timeout = new Promise((_, reject) => setTimeout(() => reject('timeout'), 3500));
-const req = fetch(https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10);
-const res = await Promise.race([req, timeout]);
-const data = await res.json();
-if (data.results && data.results.length) {
-const list = data.results.map(r => ({
-id: String(r.trackId),
-title: r.trackName,
-artist: r.artistName,
-duration: fmt((r.trackTimeMillis || 210000) / 1000),
-stream: r.previewUrl
-}));
-renderTracks(list);
-return;
-}
-} catch(e) {}
-​renderTracks(REAL_HYPE);
-}
-}
-​function startPlay(idx) {
-if (idx < 0 || idx >= currentQueue.length) return;
-activeIdx = idx;
-const track = currentQueue[activeIdx];
-​document.body.classList.add('has-active-player');
-document.getElementById('dockTitle').textContent = track.title;
-document.getElementById('dockArtist').textContent = track.artist;
-​// On-demand lazy load only for this chosen track
-audio.src = track.stream;
-audio.load();
-audio.play().then(() => setPlayState(true)).catch(() => setPlayState(false));
-}
-​function togglePlay() {
-if (!audio.src) return;
-if (audio.paused) {
-audio.play();
-setPlayState(true);
-} else {
-audio.pause();
-setPlayState(false);
-}
-}
-​function setPlayState(isPlaying) {
-playIcon.innerHTML = isPlaying
-? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
-: '<path d="m8 5 11 7-11 7z"/>';
-}
-​function skipNext() {
-if (currentQueue.length) startPlay((activeIdx + 1) % currentQueue.length);
-}
-​function skipPrev() {
-if (currentQueue.length) startPlay((activeIdx - 1 + currentQueue.length) % currentQueue.length);
-}
-​audio.onended = () => skipNext();
-​audio.ontimeupdate = () => {
-seekBar.max = Math.floor(audio.duration) || 0;
-seekBar.value = Math.floor(audio.currentTime) || 0;
-timeCur.textContent = fmt(audio.currentTime);
-timeTot.textContent = fmt(audio.duration);
-};
-​seekBar.oninput = () => { audio.currentTime = seekBar.value; };
-​function fmt(s) {
-if (!s || isNaN(s)) return '0:00';
-const m = Math.floor(s / 60);
-const sec = Math.floor(s % 60);
-return ${m}:${sec < 10 ? '0' : ''}${sec};
-}
-​function renderHype() {
-document.getElementById('sectionHeading').textContent = 'Trending Hype Right Now';
-renderTracks(REAL_HYPE);
-}
-​function triggerShuffle() {
-startPlay(Math.floor(Math.random() * currentQueue.length));
-}
-​function filterBy(q) {
-document.getElementById('searchInput').value = q;
-executeSearch(q);
-window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-​document.getElementById('searchForm').addEventListener('submit', (e) => {
-e.preventDefault();
-const val = document.getElementById('searchInput').value.trim();
-if (val) executeSearch(val);
-});
-​renderHype();
-</script>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Astra Audio home" data-view="home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M16 3 29 27H3L16 3Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="m16 11 7 13H9l7-13Z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span>ASTRA<span class="brand-light"> AUDIO</span></span>
+      </a>
+      <div class="sidebar-label">NAVIGATION</div>
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-item active" data-view="home"><span class="nav-icon" data-icon="home"></span><span>Discover</span></button>
+        <button class="nav-item" data-view="trending"><span class="nav-icon" data-icon="chart"></span><span>Charts</span></button>
+        <button class="nav-item" data-view="search"><span class="nav-icon" data-icon="search"></span><span>Search</span></button>
+        <button class="nav-item" data-view="library"><span class="nav-icon" data-icon="heart"></span><span>Your Library</span></button>
+        <button class="nav-item" data-view="playlists"><span class="nav-icon" data-icon="playlist"></span><span>Playlists</span></button>
+        <button class="nav-item" data-view="queue"><span class="nav-icon" data-icon="queue"></span><span>Up Next</span></button>
+        <button class="nav-item" data-view="equalizer"><span class="nav-icon" data-icon="sliders"></span><span>Equalizer</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-note">
+          <span class="note-icon" data-icon="info"></span>
+          <p>Full high-speed streaming engine with real-time popular chart feeds.</p>
+        </div>
+        <div class="tiny-brand">ASTRA AUDIO <span>WEB EDITION</span></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="mobileMenu" aria-label="Open menu"><span data-icon="menu"></span></button>
+        <div class="history-buttons">
+          <button class="icon-button" id="backButton" aria-label="Back"><span data-icon="back"></span></button>
+          <button class="icon-button" id="forwardButton" aria-label="Forward"><span data-icon="forward"></span></button>
+        </div>
+        <form class="searchbar" id="globalSearch">
+          <span data-icon="search"></span>
+          <input id="globalSearchInput" type="search" placeholder="What do you want to listen to?" autocomplete="off" aria-label="Search songs, artists or lyrics">
+          <button type="submit" aria-label="Search"><span data-icon="enter"></span></button>
+        </form>
+        <button class="profile-pill" id="aboutButton"><span class="profile-dot"></span><span>Web Player</span></button>
+      </header>
+
+      <section class="content" id="content">
+        <section class="view active" id="view-home">
+          <div class="hero">
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="live-dot"></span> REAL-TIME POPULAR CHARTS</div>
+              <h1>Find your<br><span>next favourite.</span></h1>
+              <p>Explore today's most viral songs, trending charts, and stream full tracks right in your browser.</p>
+              <button class="primary-button" id="heroExplore"><span data-icon="play-small"></span> Explore music</button>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+              <div class="orbit orbit-one"></div>
+              <div class="orbit orbit-two"></div>
+              <div class="hero-disc"><div class="disc-center"></div></div>
+              <div class="hero-spark spark-a"></div>
+              <div class="hero-spark spark-b"></div>
+              <div class="hero-spark spark-c"></div>
+            </div>
+          </div>
+          <div class="section-heading">
+            <div><div class="eyebrow muted">REAL HYPE • TOP CHARTS</div><h2>Discover something new</h2></div>
+            <button class="text-button" id="refreshDiscover">Refresh <span data-icon="refresh"></span></button>
+          </div>
+          <div class="track-grid" id="discoverGrid"><div class="loading-state"><span class="loader"></span> Loading real-time charts…</div></div>
+          <div class="section-heading section-gap"><div><div class="eyebrow muted">TOP VIRAL SEARCHES</div><h2>Popular searches</h2></div></div>
+          <div class="topic-grid">
+            <button class="topic-card topic-green" data-query="Sidhu Moose Wala top hits"><span>01 / VIRAL</span><strong>Sidhu Moose Wala</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-purple" data-query="Karan Aujla latest hits"><span>02 / TRENDING</span><strong>Karan Aujla</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-orange" data-query="Arijit Singh Top 20"><span>03 / BOLLYWOOD</span><strong>Arijit Singh</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-blue" data-query="Global Top 50 Hits"><span>04 / GLOBAL</span><strong>Global Pop 50</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+          </div>
+        </section>
+
+        <section class="view" id="view-search">
+          <div class="page-intro">
+            <div class="eyebrow muted">SEARCH THE GLOBE</div>
+            <h1>Search</h1>
+            <p>Find songs, lyrics, artists, or records and stream full tracks instantly.</p>
+          </div>
+          <form class="large-search" id="pageSearch">
+            <span data-icon="search"></span>
+            <input id="pageSearchInput" type="search" placeholder="Type a track title, lyrics, or artist…" autocomplete="off">
+            <button class="primary-button" type="submit">Search</button>
+          </form>
+          <div class="section-heading">
+            <h2 id="searchHeading">Start with a search</h2>
+            <span class="muted small" id="searchCount"></span>
+          </div>
+          <div class="track-grid" id="searchGrid"></div>
+        </section>
+
+        <section class="view" id="view-trending">
+          <div class="page-intro">
+            <div class="eyebrow muted">GLOBAL TOP PICKS</div>
+            <h1>Charts</h1>
+            <p>Current popular songs curated across regional top charts.</p>
+          </div>
+          <div class="filter-row">
+            <label for="countrySelect">Region</label>
+            <select id="countrySelect">
+              <option value="in" selected>India (Top Hits)</option>
+              <option value="us">United States (Billboard)</option>
+              <option value="gb">United Kingdom (Top 40)</option>
+              <option value="jp">Japan (J-Pop)</option>
+              <option value="ca">Canada</option>
+              <option value="au">Australia</option>
+              <option value="br">Brazil</option>
+              <option value="de">Germany</option>
+            </select>
+            <button class="secondary-button" id="loadCharts"><span data-icon="refresh"></span> Update charts</button>
+          </div>
+          <div class="track-grid" id="trendingGrid"><div class="loading-state"><span class="loader"></span> Loading charts…</div></div>
+        </section>
+
+        <section id="view-library" class="view">
+          <div class="page-intro">
+            <div class="eyebrow muted">BROWSER PERSISTENCE</div>
+            <h1>Your Library</h1>
+            <p>Saved songs remain stored in your local browser cache.</p>
+          </div>
+          <div class="section-heading">
+            <h2>Saved tracks</h2>
+            <span class="muted small" id="libraryCount">0 tracks</span>
+          </div>
+          <div class="track-grid" id="libraryGrid"></div>
+        </section>
+
+        <section id="view-playlists" class="view">
+          <div class="page-intro">
+            <div class="eyebrow muted">CUSTOM MIXES</div>
+            <h1>Playlists</h1>
+            <p>Create and customize your personal track listings.</p>
+          </div>
+          <form class="create-playlist" id="playlistForm">
+            <input id="playlistName" maxlength="50" placeholder="New playlist name" aria-label="New playlist name" required>
+            <button class="primary-button" type="submit"><span data-icon="plus"></span> Create</button>
+          </form>
+          <div id="playlistList" class="playlist-list"></div>
+        </section>
+
+        <section id="view-queue" class="view">
+          <div class="page-intro">
+            <div class="eyebrow muted">ACTIVE ROTATION</div>
+            <h1>Up Next</h1>
+            <p>View and manage songs lined up to play.</p>
+          </div>
+          <div class="section-heading">
+            <h2>Queue</h2>
+            <button class="text-button" id="clearQueue">Clear queue</button>
+          </div>
+          <div class="track-grid" id="queueGrid"></div>
+        </section>
+
+        <section id="view-equalizer" class="view">
+          <div class="page-intro">
+            <div class="eyebrow muted">AUDIO PROCESSING</div>
+            <h1>Equalizer</h1>
+            <p>Adjust low, mid, and high frequencies in real-time.</p>
+          </div>
+          <div class="eq-panel">
+            <div class="eq-header">
+              <div>
+                <h2>Custom EQ</h2>
+                <p class="muted">Live Web Audio biquad filters.</p>
+              </div>
+              <button class="secondary-button" id="resetEQ">Reset</button>
+            </div>
+            <div class="eq-sliders">
+              <label class="eq-control"><span>Bass <b id="bassValue">0 dB</b></span><input id="bass" type="range" min="-12" max="12" value="0"><small>LOW</small></label>
+              <label class="eq-control"><span>Mid <b id="midValue">0 dB</b></span><input id="mid" type="range" min="-12" max="12" value="0"><small>MID</small></label>
+              <label class="eq-control"><span>Treble <b id="trebleValue">0 dB</b></span><input id="treble" type="range" min="-12" max="12" value="0"><small>HIGH</small></label>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <footer class="player" id="playerBar">
+    <div class="now-playing">
+      <img id="playerArt" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><rect width='48' height='48' fill='%23192219'/></svg>" alt="" class="player-art">
+      <div class="now-meta">
+        <strong id="playerTitle">Select a track</strong>
+        <span id="playerArtist">Astra Audio</span>
+      </div>
+      <button class="icon-button save-current" id="saveCurrent" aria-label="Save current track" title="Save track"><span data-icon="heart"></span></button>
+    </div>
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="icon-button control-button" id="shuffleButton" aria-label="Shuffle queue" title="Shuffle"><span data-icon="shuffle"></span></button>
+        <button class="icon-button control-button" id="previousButton" aria-label="Previous track"><span data-icon="previous"></span></button>
+        <button class="play-button" id="playButton" aria-label="Play">
+          <span class="btn-spinner" id="playSpinner" style="display:none"></span>
+          <span id="playIconSpan" data-icon="play"></span>
+        </button>
+        <button class="icon-button control-button" id="nextButton" aria-label="Next track"><span data-icon="next"></span></button>
+        <button class="icon-button control-button" id="repeatButton" aria-label="Repeat queue" title="Repeat"><span data-icon="repeat"></span></button>
+      </div>
+      <div class="seek-row">
+        <span id="currentTime">0:00</span>
+        <div class="seek-slider-container">
+          <div class="buffer-fill" id="bufferFill"></div>
+          <input id="seekBar" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek track">
+        </div>
+        <span id="durationTime">0:00</span>
+      </div>
+    </div>
+    <div class="player-right">
+      <span data-icon="volume"></span>
+      <input id="volumeBar" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volume">
+      <button class="icon-button queue-open" id="openQueue" aria-label="Open queue"><span data-icon="queue"></span></button>
+    </div>
+    <audio id="audio" preload="auto" crossorigin="anonymous"></audio>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="icon-button modal-close" id="modalClose" aria-label="Close"><span data-icon="close"></span></button>
+      <h2 id="modalTitle">About Astra Audio</h2>
+      <p>Astra Audio is built for static deployment on GitHub Pages. It features direct full-length streaming, live buffer visualization, dynamic auto-next recommendation playback, client-side caching, and Web Audio equalizers.</p>
+      <button class="primary-button" id="modalOk">Got it</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
-  </html>
+</html>

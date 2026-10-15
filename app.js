@@ -96,7 +96,10 @@
   }
 
   function renderTracks(target, tracks, opts = {}) {
-    const el = typeof target === 'string' ? $(target) : target; if (!el) return; el.innerHTML = tracks.length ? tracks.map(t => trackCard(t, opts)).join('') : empty(opts.empty \vert{}\vert{} 'Nothing here yet.'); $$('.track-card', el).forEach((c, i) => c._track = tracks[i]);
+    const el = typeof target === 'string' ? $(target) : target;
+    if (!el) return;
+    el.innerHTML = tracks.length ? tracks.map(t => trackCard(t, opts)).join('') : empty(opts.empty || 'Nothing here yet.');
+    $$('.track-card', el).forEach((card, index) => { card._track = tracks[index]; });
   }
 
   /* Saavn & iTunes Multi-Mirror Streaming Engine */
@@ -628,8 +631,8 @@
     runSearch($('#pageSearchInput').value);
   });
 
-  $$('.nav-item').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));$$
-('[data-query]').forEach(b => b.addEventListener('click', () => runSearch(b.dataset.query)));
+  $$('.nav-item').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+  $$('[data-query]').forEach(b => b.addEventListener('click', () => runSearch(b.dataset.query)));
   $('#heroExplore').addEventListener('click', () => { showView('search'); $('#pageSearchInput').focus(); });
   $('#refreshDiscover').addEventListener('click', loadDiscovery);
   $('#loadCharts').addEventListener('click', loadCharts);
