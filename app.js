@@ -35,6 +35,9 @@
   let shuffle = false;
   let repeat = false;
   let toastTimer;
+  let activePlayController = null;
+  let waitingTimer = null;
+  let playbackFailed = false;
 
   let activeView = store.get('last_view', 'home');
   let history = [activeView];
@@ -253,6 +256,62 @@
       // Fall back to an available preview if no full stream can be resolved.
     }
     return track.previewUrl || '';
+  }
+
+  function waitForPlayback(url, signal) {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const timer = setTimeout(() => finish(new Error('Playback timed out')), 8000);
+      const cleanup = () => {
+        clearTimeout(timer);
+        audio.removeEventListener('playing', onPlaying);
+        audio.removeEventListener('error', onError);
+        signal.removeEventListener('abort', onAbort);
+      };
+      const finish = error => {
+        if (settled) return;
+        settled = true;
+        if (error) clearTimeout(waitingTimer);
+        cleanup();
+        if (error) reject(error);
+        else resolve();
+      };
+      const onPlaying = () => finish();
+      const onError = () => finish(new Error('The audio stream failed to load'));
+      const onAbort = () => finish(new DOMException('Playback cancelled', 'AbortError'));
+
+      audio.addEventListener('playing', onPlaying);
+      audio.addEventListener('error', onError);
+      signal.addEventListener('abort', onAbort, { once: true });
+      if (signal.aborted) {
+        onAbort();
+        return;
+      }
+
+      try {
+        audio.src = url;
+        audio.load();
+        audio.play().catch(finish);
+      } catch (error) {
+        finish(error);
+      }
+    });
+  }
+
+  async function findPreviewUrl(track, signal) {
+    if (track.previewUrl) return track.previewUrl;
+    const matches = await searchItunes(`${track.title} ${track.artist}`, 10, signal);
+    const normalize = value => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const title = normalize(track.title);
+    const artistNames = String(track.artist || '').split(/,|&|\bfeat\.?\b/i).map(normalize).filter(name => name.length > 2);
+    const match = matches.find(candidate => {
+      const candidateTitle = normalize(candidate.title);
+      const candidateArtist = normalize(candidate.artist);
+      return candidate.previewUrl &&
+        (candidateTitle === title || candidateTitle.includes(title) || title.includes(candidateTitle)) &&
+        artistNames.some(artist => candidateArtist.includes(artist) || artist.includes(candidateArtist));
+    });
+    return match?.previewUrl || '';
   }
 
   async function loadDiscovery() {
@@ -486,7 +545,13 @@
   }
 
   async function playTrack(track, fromQueue = false) {
+    activePlayController?.abort();
+    const controller = new AbortController();
+    activePlayController = controller;
+    const isCancelled = () => controller.signal.aborted;
+
     try {
+      playbackFailed = false;
       setPlayerIcon(false, true);
 
       if (!fromQueue) {
@@ -501,6 +566,7 @@
       }
 
       updatePlayer(track);
+      setPlayerIcon(false, true);
 
       // Lazy load stream ONLY for this chosen song
       const streamUrl = await resolveStreamUrl(track);
@@ -510,16 +576,25 @@
         await audioContext.resume();
       }
 
-      if (audio.src !== streamUrl) {
-        audio.src = streamUrl;
-        audio.load();
+      try {
+        await waitForPlayback(streamUrl, controller.signal);
+      } catch (error) {
+        if (isCancelled()) return;
+        const previewUrl = await findPreviewUrl(track, controller.signal);
+        if (!previewUrl || previewUrl === streamUrl) throw error;
+        track.previewUrl = previewUrl;
+        await waitForPlayback(previewUrl, controller.signal);
       }
 
-      await audio.play();
+      playbackFailed = false;
       setPlayerIcon(true, false);
-    } catch {
+    } catch (error) {
+      if (isCancelled()) return;
+      playbackFailed = true;
       setPlayerIcon(false, false);
-      toast('Tap Play to start audio stream.');
+      toast('Could not play this track. Try another song or tap Play to retry.');
+    } finally {
+      if (activePlayController === controller) activePlayController = null;
     }
   }
 
@@ -531,9 +606,18 @@
       return;
     }
 
+    if (audio.paused && (playbackFailed || !audio.currentSrc) && current) {
+      playTrack(current, true);
+      return;
+    }
+
     if (audio.paused) {
       if (initEQ() && audioContext.state === 'suspended') audioContext.resume();
-      audio.play().then(() => setPlayerIcon(true)).catch(() => toast('Tap Play again to start audio.'));
+      audio.play().then(() => setPlayerIcon(true)).catch(() => {
+        playbackFailed = true;
+        setPlayerIcon(false, false);
+        toast('Could not resume playback. Tap Play to retry.');
+      });
     } else {
       audio.pause();
       setPlayerIcon(false);
@@ -740,7 +824,9 @@
   });
 
   audio.addEventListener('play', () => setPlayerIcon(true, false));
-  audio.addEventListener('pause', () => setPlayerIcon(false, false));
+  audio.addEventListener('pause', () => {
+    if (!activePlayController) setPlayerIcon(false, false);
+  });
   audio.addEventListener('ended', () => {
     if (repeat) {
       audio.currentTime = 0;
@@ -750,13 +836,28 @@
     }
   });
 
-  audio.addEventListener('waiting', () => setPlayerIcon(false, true));
-  audio.addEventListener('playing', () => setPlayerIcon(true, false));
+  audio.addEventListener('waiting', () => {
+    setPlayerIcon(false, true);
+    clearTimeout(waitingTimer);
+    waitingTimer = setTimeout(() => {
+      if (audio.paused || audio.readyState >= 3) return;
+      audio.pause();
+      playbackFailed = true;
+      setPlayerIcon(false, false);
+      toast('Audio is taking too long to load. Tap Play to retry.');
+    }, 12000);
+  });
+  audio.addEventListener('playing', () => {
+    clearTimeout(waitingTimer);
+    setPlayerIcon(true, false);
+  });
 
   audio.addEventListener('error', () => {
+    clearTimeout(waitingTimer);
+    if (activePlayController) return;
+    playbackFailed = true;
     setPlayerIcon(false, false);
-    toast('Song stream temporarily unreachable. Auto-playing next…');
-    setTimeout(() => playNext(1), 1200);
+    toast('This audio stream is unavailable. Try another track.');
   });
 
   $('#bass').addEventListener('input', updateEQ);
