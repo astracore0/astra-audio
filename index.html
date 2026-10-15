@@ -7,7 +7,7 @@
   <title>Astra Audio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;750;850&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
@@ -63,7 +63,6 @@
       outline-offset: 2px;
     }
 
-    /* Strict Icon Sizes - Never Stretch */
     svg {
       width: 20px !important;
       height: 20px !important;
@@ -491,7 +490,7 @@
     .eq-control b { display: block; font-size: 22px; color: var(--green); margin-top: 6px; }
     .eq-control input { width: 100%; accent-color: var(--green); }
 
-    /* DOCK PLAYER: COMPLETELY HIDDEN UNTIL MUSIC IS SELECTED */
+    /* DOCK PLAYER: HIDDEN UNTIL MUSIC IS PLAYED */
     .player {
       position: fixed;
       z-index: 50;
@@ -551,9 +550,10 @@
       transform: translateY(-50%);
       height: 4px;
       width: 0%;
-      background: #344736;
+      background: #3a523c;
       border-radius: 4px;
       pointer-events: none;
+      transition: width 0.2s ease;
     }
     .seek-row input {
       position: relative;
@@ -681,7 +681,6 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="Astra Audio home" data-view="home">
         <span class="brand-mark" aria-hidden="true">
@@ -705,13 +704,12 @@
       <div class="sidebar-bottom">
         <div class="sidebar-note">
           <span class="note-icon" data-icon="info"></span>
-          <p>Uncapped streaming buffer with client-side cache and real-time audio controls.</p>
+          <p>Uncapped streaming buffer with client-side cache and auto-next recommendation playback.</p>
         </div>
         <div class="tiny-brand">ASTRA AUDIO <span>WEB EDITION</span></div>
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-area">
       <header class="topbar">
         <button class="icon-button mobile-menu" id="mobileMenu" aria-label="Open menu"><span data-icon="menu"></span></button>
@@ -728,7 +726,6 @@
       </header>
 
       <section class="content" id="content">
-        <!-- VIEW: DISCOVER -->
         <section class="view active" id="view-home">
           <div class="hero">
             <div class="hero-copy">
@@ -753,19 +750,18 @@
           <div class="track-grid" id="discoverGrid"><div class="loading-state"><span class="loader"></span> Loading music catalogue…</div></div>
           <div class="section-heading section-gap"><div><div class="eyebrow muted">KEEP EXPLORING</div><h2>Popular searches</h2></div></div>
           <div class="topic-grid">
-            <button class="topic-card topic-green" data-query="indie pop"><span>01 / INDIE</span><strong>Indie Pop</strong><span class="topic-arrow" data-icon="arrow"></span></button>
-            <button class="topic-card topic-purple" data-query="soundtrack"><span>02 / SCORES</span><strong>Soundtracks</strong><span class="topic-arrow" data-icon="arrow"></span></button>
-            <button class="topic-card topic-orange" data-query="acoustic rock"><span>03 / ROCK</span><strong>Acoustic Rock</strong><span class="topic-arrow" data-icon="arrow"></span></button>
-            <button class="topic-card topic-blue" data-query="electronic dance"><span>04 / EDM</span><strong>Electronic</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-green" data-query="zara zara"><span>01 / POPULAR</span><strong>Zara Zara</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-purple" data-query="lofi hindi"><span>02 / LO-FI</span><strong>Lo-Fi Vibes</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-orange" data-query="arijit singh hits"><span>03 / BOLLYWOOD</span><strong>Arijit Singh</strong><span class="topic-arrow" data-icon="arrow"></span></button>
+            <button class="topic-card topic-blue" data-query="english pop"><span>04 / ENGLISH</span><strong>Global Pop</strong><span class="topic-arrow" data-icon="arrow"></span></button>
           </div>
         </section>
 
-        <!-- VIEW: SEARCH -->
         <section class="view" id="view-search">
           <div class="page-intro">
             <div class="eyebrow muted">SEARCH THE GLOBE</div>
             <h1>Search</h1>
-            <p>Find songs, artists, or records and stream instantly.</p>
+            <p>Find songs, artists, or records and stream full tracks instantly.</p>
           </div>
           <form class="large-search" id="pageSearch">
             <span data-icon="search"></span>
@@ -779,19 +775,18 @@
           <div class="track-grid" id="searchGrid"></div>
         </section>
 
-        <!-- VIEW: CHARTS -->
         <section class="view" id="view-trending">
           <div class="page-intro">
             <div class="eyebrow muted">GLOBAL TOP PICKS</div>
             <h1>Charts</h1>
-            <p>Current popular songs curated across global music feeds.</p>
+            <p>Current popular songs curated across regional top charts.</p>
           </div>
           <div class="filter-row">
             <label for="countrySelect">Region</label>
             <select id="countrySelect">
+              <option value="in" selected>India</option>
               <option value="us">United States</option>
               <option value="gb">United Kingdom</option>
-              <option value="in" selected>India</option>
               <option value="jp">Japan</option>
               <option value="ca">Canada</option>
               <option value="au">Australia</option>
@@ -803,7 +798,6 @@
           <div class="track-grid" id="trendingGrid"><div class="loading-state"><span class="loader"></span> Loading charts…</div></div>
         </section>
 
-        <!-- VIEW: LIBRARY -->
         <section id="view-library" class="view">
           <div class="page-intro">
             <div class="eyebrow muted">BROWSER PERSISTENCE</div>
@@ -817,7 +811,6 @@
           <div class="track-grid" id="libraryGrid"></div>
         </section>
 
-        <!-- VIEW: PLAYLISTS -->
         <section id="view-playlists" class="view">
           <div class="page-intro">
             <div class="eyebrow muted">CUSTOM MIXES</div>
@@ -831,7 +824,6 @@
           <div id="playlistList" class="playlist-list"></div>
         </section>
 
-        <!-- VIEW: QUEUE -->
         <section id="view-queue" class="view">
           <div class="page-intro">
             <div class="eyebrow muted">ACTIVE ROTATION</div>
@@ -845,7 +837,6 @@
           <div class="track-grid" id="queueGrid"></div>
         </section>
 
-        <!-- VIEW: EQUALIZER -->
         <section id="view-equalizer" class="view">
           <div class="page-intro">
             <div class="eyebrow muted">AUDIO PROCESSING</div>
@@ -871,7 +862,7 @@
     </main>
   </div>
 
-  <!-- BOTTOM DOCK PLAYER (DEFAULT HIDDEN UNTIL SONG LOADED) -->
+  <!-- DOCK PLAYER -->
   <footer class="player" id="playerBar">
     <div class="now-playing">
       <img id="playerArt" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><rect width='48' height='48' fill='%23192219'/></svg>" alt="" class="player-art">
@@ -915,7 +906,7 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <button class="icon-button modal-close" id="modalClose" aria-label="Close"><span data-icon="close"></span></button>
       <h2 id="modalTitle">About Astra Audio</h2>
-      <p>Astra Audio is built for static deployment on GitHub Pages. It features responsive touch design, client caching, full-length audio streaming fallbacks, and real-time equalizer filters.</p>
+      <p>Astra Audio is built for static deployment on GitHub Pages. It features direct full-length streaming, live buffer visualization, dynamic auto-next recommendation playback, client-side caching, and Web Audio equalizers.</p>
       <button class="primary-button" id="modalOk">Got it</button>
     </div>
   </div>
@@ -1005,23 +996,6 @@
 
       const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-      const cleanTrack = t => {
-        const durationSeconds = t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 0;
-        return {
-          id: String(t.trackId ?? t.id ?? ''),
-          title: t.trackName || t.title || 'Untitled track',
-          artist: t.artistName || t.artist || 'Unknown artist',
-          album: t.collectionName || t.album || '',
-          art: t.artworkUrl100 || t.art || FALLBACK,
-          preview: t.previewUrl || t.preview || '',
-          fullStream: t.fullStream || '',
-          duration: durationSeconds,
-          url: t.trackViewUrl || ''
-        };
-      };
-
-      const dedupe = arr => [...new Map(arr.filter(t => t && t.id).map(t => [String(t.id), t])).values()];
-
       function fmt(n) {
         if (!Number.isFinite(n) || n < 0) return '0:00';
         const m = Math.floor(n / 60), s = Math.floor(n % 60);
@@ -1073,7 +1047,7 @@
         $$('.track-card', el).forEach((c, i) => c._track = tracks[i]);
       }
 
-      async function fetchWithTimeout(url, ms = 7000) {
+      async function fetchWithTimeout(url, ms = 6500) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), ms);
         try {
@@ -1087,57 +1061,95 @@
         }
       }
 
-      async function searchTracks(term, limit = 30) {
+      // High-speed, trusted Full-Song API Pipeline (Saavn + iTunes Metadata)
+      const SAAVN_MIRRORS = [
+        'https://saavn.dev/api',
+        'https://jiosaavn-api-privatecvc2.vercel.app'
+      ];
+
+      function cleanSaavnTrack(item) {
+        const durationSeconds = Number(item.duration) || 0;
+        const dlUrls = item.downloadUrl || [];
+        const bestAudio = (dlUrls.find(u => u.quality === '320kbps') || dlUrls.find(u => u.quality === '160kbps') || dlUrls[dlUrls.length - 1])?.url || '';
+        const imgs = item.image || [];
+        const bestImg = (imgs.find(i => i.quality === '500x500') || imgs[imgs.length - 1])?.url || FALLBACK;
+
+        return {
+          id: String(item.id || ''),
+          title: item.name || item.title || 'Untitled Track',
+          artist: item.primaryArtists || item.singers || item.artist || 'Unknown Artist',
+          album: item.album?.name || item.album || '',
+          art: bestImg,
+          fullStream: bestAudio,
+          preview: bestAudio,
+          duration: durationSeconds,
+          source: 'saavn'
+        };
+      }
+
+      function cleanITunesTrack(t) {
+        const durationSeconds = t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 0;
+        return {
+          id: String(t.trackId || ''),
+          title: t.trackName || 'Untitled Track',
+          artist: t.artistName || 'Unknown Artist',
+          album: t.collectionName || '',
+          art: t.artworkUrl100 ? t.artworkUrl100.replace('100x100bb', '500x500bb') : FALLBACK,
+          preview: t.previewUrl || '',
+          fullStream: '',
+          duration: durationSeconds,
+          source: 'itunes'
+        };
+      }
+
+      async function searchFullSongs(term, limit = 25) {
         const cacheKey = `search_${term.toLowerCase().trim()}`;
         const cached = store.get(cacheKey, null);
         if (cached && Array.isArray(cached) && cached.length) return cached;
 
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=${limit}`;
-        const data = await fetchWithTimeout(url);
-        const results = dedupe((data.results || []).map(cleanTrack).filter(t => t.id));
-        if (results.length) store.set(cacheKey, results.slice(0, 24));
-        return results;
-      }
-
-      // Public fast streams for full song length
-      const AUDIO_MIRRORS = [
-        'https://pipedapi.kavin.rocks',
-        'https://api.piped.privacy.com.de',
-        'https://piped-api.lunar.icu'
-      ];
-
-      async function resolveFullAudio(track) {
-        if (track.fullStream) return track.fullStream;
-
-        const query = `${track.title} ${track.artist}`;
-        for (const mirror of AUDIO_MIRRORS) {
+        // Try direct high-quality streaming API
+        for (const mirror of SAAVN_MIRRORS) {
           try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 4500);
-            const searchRes = await fetch(`${mirror}/search?q=${encodeURIComponent(query)}&filter=music_songs`, { signal: controller.signal });
-            clearTimeout(timeout);
-            if (!searchRes.ok) continue;
-
-            const searchData = await searchRes.json();
-            const first = (searchData.items || [])[0];
-            if (!first) continue;
-
-            const videoId = first.url ? first.url.replace('/watch?v=', '') : first.id;
-            if (!videoId) continue;
-
-            const streamRes = await fetch(`${mirror}/streams/${videoId}`);
-            if (!streamRes.ok) continue;
-
-            const streamData = await streamRes.json();
-            const streams = (streamData.audioStreams || []).sort((a, b) => b.bitrate - a.bitrate);
-            const best = streams.find(s => !s.format?.includes('WEBM')) || streams[0];
-
-            if (best && best.url) {
-              track.fullStream = best.url;
-              return best.url;
+            const data = await fetchWithTimeout(`${mirror}/search/songs?query=${encodeURIComponent(term)}&limit=${limit}`);
+            const results = (data.data?.results || data.results || []).map(cleanSaavnTrack).filter(t => t.id && t.fullStream);
+            if (results.length) {
+              store.set(cacheKey, results.slice(0, 24));
+              return results;
             }
           } catch (e) {}
         }
+
+        // Fallback to iTunes Search
+        try {
+          const itunesData = await fetchWithTimeout(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=${limit}`);
+          const results = (itunesData.results || []).map(cleanITunesTrack).filter(t => t.id);
+          if (results.length) {
+            store.set(cacheKey, results.slice(0, 24));
+            return results;
+          }
+        } catch (e) {}
+
+        return [];
+      }
+
+      async function resolveStream(track) {
+        if (track.fullStream) return track.fullStream;
+
+        // In case track came from iTunes, resolve full streaming URL
+        const q = `${track.title} ${track.artist}`.trim();
+        for (const mirror of SAAVN_MIRRORS) {
+          try {
+            const data = await fetchWithTimeout(`${mirror}/search/songs?query=${encodeURIComponent(q)}&limit=3`);
+            const items = (data.data?.results || data.results || []).map(cleanSaavnTrack).filter(t => t.fullStream);
+            if (items.length) {
+              track.fullStream = items[0].fullStream;
+              if (items[0].duration) track.duration = items[0].duration;
+              return track.fullStream;
+            }
+          } catch (e) {}
+        }
+
+        // If direct 320kbps full stream couldn't be resolved, return 30s preview as fallback
         return track.preview;
       }
 
@@ -1145,18 +1157,24 @@
         const grid = $('#discoverGrid');
         grid.innerHTML = '<div class="loading-state"><span class="loader"></span> Loading music catalogue…</div>';
 
-        const cached = store.get('discovery_cache', null);
-        if (cached && cached.length) renderTracks(grid, cached, { empty: 'No tracks found.' });
-
-        const terms = ['indie pop', 'electronic dance', 'lofi beats', 'classic hits', 'acoustic rhythm'];
+        const terms = ['zara zara', 'arijit singh', 'indie hindi pop', 'lofi beats hindi', 'ed sheeran', 'trending pop'];
         const term = terms[Math.floor(Math.random() * terms.length)];
 
         try {
-          const tracks = await searchTracks(term, 20);
-          store.set('discovery_cache', tracks);
-          renderTracks(grid, tracks, { empty: 'No tracks found. Try Search instead.' });
+          const tracks = await searchFullSongs(term, 20);
+          if (tracks.length) {
+            store.set('discovery_cache', tracks);
+            renderTracks(grid, tracks, { empty: 'No tracks found. Try Search instead.' });
+          } else {
+            throw new Error('No tracks');
+          }
         } catch {
-          if (!cached || !cached.length) grid.innerHTML = empty('Feed timed out. Tap Refresh to retry.');
+          const cached = store.get('discovery_cache', []);
+          if (cached.length) {
+            renderTracks(grid, cached, { empty: 'Feed timed out. Tap Refresh to retry.' });
+          } else {
+            grid.innerHTML = empty('Feed timed out. Tap Refresh to retry.');
+          }
         }
       }
 
@@ -1174,7 +1192,7 @@
         store.set('last_search_term', term);
 
         try {
-          const tracks = await searchTracks(term, 40);
+          const tracks = await searchFullSongs(term, 30);
           renderTracks('#searchGrid', tracks, { empty: 'No matches found. Try another spelling.' });
           $('#searchCount').textContent = `${tracks.length} tracks`;
         } catch {
@@ -1189,8 +1207,16 @@
         grid.innerHTML = '<div class="loading-state"><span class="loader"></span> Loading charts…</div>';
 
         try {
+          if (country === 'in') {
+            const hindiTracks = await searchFullSongs('Top Hindi Songs', 25);
+            if (hindiTracks.length) {
+              renderTracks(grid, hindiTracks, { empty: 'No chart data available.' });
+              toast(`Loaded ${hindiTracks.length} chart tracks`);
+              return;
+            }
+          }
           const data = await fetchWithTimeout(`https://rss.applemarketingtools.com/api/v2/${encodeURIComponent(country)}/music/most-played/50/songs.json`);
-          const tracks = dedupe((data.feed?.results || []).map(cleanTrack));
+          const tracks = (data.feed?.results || []).map(cleanITunesTrack);
           renderTracks(grid, tracks, { empty: 'No chart data for this region.' });
           toast(`Loaded ${tracks.length} chart tracks`);
         } catch {
@@ -1369,14 +1395,19 @@
           setPlayerIcon(false, true);
 
           if (!fromQueue) {
-            if (!queue.some(t => t.id === track.id)) queue.unshift(track);
-            queueIndex = queue.findIndex(t => t.id === track.id);
+            const inQueueIdx = queue.findIndex(t => t.id === track.id);
+            if (inQueueIdx === -1) {
+              queue.unshift(track);
+              queueIndex = 0;
+            } else {
+              queueIndex = inQueueIdx;
+            }
             store.set('queue', queue);
           }
 
           updatePlayer(track);
 
-          const streamUrl = await resolveFullAudio(track);
+          const streamUrl = await resolveStream(track);
           if (!streamUrl) throw new Error('No stream found');
 
           if (initEQ() && audioContext.state === 'suspended') {
@@ -1397,7 +1428,7 @@
 
       function togglePlay() {
         if (!current) {
-          const first = queue.find(t => t.preview || t.fullStream) || saved.find(t => t.preview || t.fullStream);
+          const first = queue[0] || saved[0];
           if (first) playTrack(first);
           else toast('Choose a track to start listening.');
           return;
@@ -1412,15 +1443,37 @@
         }
       }
 
-      function playNext(direction = 1) {
-        if (!queue.length) { toast('Your queue is empty.'); return; }
-        if (shuffle && direction > 0) {
-          let idx = queue.length > 1 ? Math.floor(Math.random() * queue.length) : 0;
-          queueIndex = idx;
-        } else {
-          queueIndex = (queueIndex + direction + queue.length) % queue.length;
+      async function playNext(direction = 1) {
+        if (queue.length > 1) {
+          if (shuffle && direction > 0) {
+            queueIndex = Math.floor(Math.random() * queue.length);
+          } else {
+            queueIndex = (queueIndex + direction + queue.length) % queue.length;
+          }
+          playTrack(queue[queueIndex], true);
+          return;
         }
-        playTrack(queue[queueIndex], true);
+
+        // Auto-Next: Recommend and play similar song automatically
+        if (current) {
+          toast('Loading next similar song…');
+          const term = `${current.artist || current.title} songs`;
+          try {
+            const results = await searchFullSongs(term, 10);
+            const nextTrackCandidate = results.find(t => t.id !== current.id);
+            if (nextTrackCandidate) {
+              queue.push(nextTrackCandidate);
+              queueIndex = queue.length - 1;
+              store.set('queue', queue);
+              playTrack(nextTrackCandidate, true);
+              return;
+            }
+          } catch (e) {}
+        }
+
+        if (saved.length) {
+          playTrack(saved[0]);
+        }
       }
 
       function addQueue(track) {
@@ -1566,13 +1619,23 @@
       audio.volume = 0.8;
       $('#volumeBar').value = 0.8;
 
+      // Real-time Buffer Bar & Accurate Duration Tracking
       audio.addEventListener('timeupdate', () => {
-        const dur = Number.isFinite(audio.duration) ? audio.duration : (current?.duration || 0);
+        const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : (current?.duration || 0);
         $('#seekBar').max = dur || 100;
         $('#seekBar').value = audio.currentTime || 0;
         $('#currentTime').textContent = fmt(audio.currentTime);
         $('#durationTime').textContent = fmt(dur);
 
+        if (audio.buffered.length > 0 && dur > 0) {
+          const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+          const pct = Math.min(100, Math.max(0, (bufferedEnd / dur) * 100));
+          $('#bufferFill').style.width = `${pct}%`;
+        }
+      });
+
+      audio.addEventListener('progress', () => {
+        const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : (current?.duration || 0);
         if (audio.buffered.length > 0 && dur > 0) {
           const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
           const pct = Math.min(100, Math.max(0, (bufferedEnd / dur) * 100));
@@ -1586,10 +1649,8 @@
         if (repeat) {
           audio.currentTime = 0;
           audio.play();
-        } else if (queue.length) {
-          playNext(1);
         } else {
-          setPlayerIcon(false, false);
+          playNext(1);
         }
       });
 
@@ -1598,7 +1659,8 @@
 
       audio.addEventListener('error', () => {
         setPlayerIcon(false, false);
-        toast('Playback error on current mirror. Tap Play to retry.');
+        toast('Audio source temporarily unreachable. Retrying next…');
+        setTimeout(() => playNext(1), 1200);
       });
 
       $('#bass').addEventListener('input', updateEQ);
