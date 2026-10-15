@@ -1,36 +1,24 @@
-# Astra Audio — GitHub Pages edition
+# Astra Audio
 
-A responsive HTML/CSS/JavaScript music discovery web app. It runs as a static site on GitHub Pages and does not require Python, Termux, Node.js, a backend server, or an API key.
+A responsive, static music player for GitHub Pages. The app runs entirely in the browser and needs no build tools, server, account, or API key.
 
-## Features
-- Responsive layout for phones, tablets, laptops, and desktops
-- Custom inline SVG icons (no emoji iconography or icon font)
-- Search tracks, artists, and albums using the iTunes Search API
-- Regional most-played charts using Apple's public RSS feed
-- Play available official preview clips, seek, volume, next/previous, shuffle, repeat
-- Save tracks to a browser-local library
-- Queue management and locally stored playlists
-- Bass/mid/treble equalizer using Web Audio API when supported
-- No ads inserted by this app; the app does not control third-party provider policies
+## What it plays
 
-## Publish with the GitHub website (no terminal)
-1. Download and extract `astra-audio-github.zip` on your device.
-2. Open your GitHub repository in a browser.
-3. Choose **Add file → Upload files**.
-4. Upload `index.html`, `style.css`, `app.js`, and the `assets` folder contents to the repository root. Do not upload the ZIP itself as the website.
-5. Commit the changes.
-6. Open **Settings → Pages** and select **GitHub Actions** as the build source.
-7. The repository must include `.github/workflows/pages.yml`. If you do not want to upload that workflow, choose **Deploy from a branch**, select `main` and `/ (root)` instead.
-8. Wait for the Pages deployment to finish, then open the URL displayed under Settings → Pages.
+- **Your audio files:** Import files you own or are authorized to play. They are stored in this browser's IndexedDB and can play at full length. Files are not uploaded. Clearing browser site data removes the local copies.
+- **Catalogue previews:** Search the public Apple iTunes Search API for track, artist, and album metadata, including catalogue duration where available. Search supports normalized title, artist, and album matching; it does not search lyrics. When available, the player can play Apple's short preview clip. A preview is not a full song; this app does not use third-party stream proxies or obtain full tracks from unlicensed sources.
+- **Local library and queue:** Save tracks, add tracks to the queue, and keep preferences, current track, and playback position in this browser's local storage. Local file contents use IndexedDB. Browser storage is not synced across devices.
 
-## Music and preview limitations
-This version uses Apple's public iTunes Search and RSS chart endpoints. Track search and preview availability vary by country and catalogue. Most preview URLs are short samples, not full songs. This is not a full-song streaming service, and it cannot guarantee that every search result has a playable preview. To offer full-length music, integrate a provider that explicitly licenses that playback model; this cannot be achieved by GitHub Pages alone.
+Catalogue search does not search lyrics. Lyrics search requires an authorized lyrics provider and is not configured.
 
-## Storage
-Library, playlists, and preferences are stored in localStorage in the current browser. They do not sync across devices and may be cleared if browser data is cleared.
+## Run locally
 
-## If results do not load
-- Make sure the browser has internet access.
-- Try another search term or region.
-- Some networks, browser privacy settings, or provider outages can block public API requests.
-- GitHub Pages serves the site over HTTPS. Provider endpoints are HTTPS too.
+Open `index.html` in a modern browser or serve the repository root as static files. For GitHub Pages, select **GitHub Actions** as the Pages source; `.github/workflows/pages.yml` publishes the repository.
+
+The app is a single self-contained `index.html`: styling and JavaScript are inline. Catalogue search and artwork use Apple's public services; metadata requests time out after 4.5 seconds, and preview audio is requested only after Play is pressed.
+
+## Limitations
+
+- Catalogue results and previews depend on the Apple API, network access, and regional availability.
+- Full-length playback is available for user-selected local audio only, unless a properly licensed provider is integrated.
+- Imported audio is stored on the current browser/device and can consume browser storage quota.
+- Search metadata and preview URLs are retrieved on demand; audio is assigned to the player only after the user presses Play.
