@@ -12,7 +12,9 @@
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="Astra Audio home" data-view="home">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 3 29 27H3L16 3Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="m16 11 7 13H9l7-13Z" fill="currentColor"/></svg></span>
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M16 3 29 27H3L16 3Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="m16 11 7 13H9l7-13Z" fill="currentColor"/></svg>
+        </span>
         <span>ASTRA<span class="brand-light"> AUDIO</span></span>
       </a>
       <div class="sidebar-label">YOUR SPACE</div>
@@ -26,7 +28,10 @@
         <button class="nav-item" data-view="equalizer"><span class="nav-icon" data-icon="sliders"></span><span>Equalizer</span></button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="sidebar-note"><span class="note-icon" data-icon="info"></span><p>Plays official music previews. Full-length playback depends on the music provider.</p></div>
+        <div class="sidebar-note">
+          <span class="note-icon" data-icon="info"></span>
+          <p>Plays official music previews. Offline cache active in your browser.</p>
+        </div>
         <div class="tiny-brand">ASTRA AUDIO <span>WEB EDITION</span></div>
       </div>
     </aside>
@@ -47,6 +52,7 @@
       </header>
 
       <section class="content" id="content">
+        <!-- HOME / DISCOVER -->
         <section class="view active" id="view-home">
           <div class="hero">
             <div class="hero-copy">
@@ -55,9 +61,19 @@
               <p>Explore new sounds, discover artists, and build a library that feels like yours.</p>
               <button class="primary-button" id="heroExplore"><span data-icon="play-small"></span> Explore music</button>
             </div>
-            <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="hero-disc"><div class="disc-center"></div></div><div class="hero-spark spark-a"></div><div class="hero-spark spark-b"></div><div class="hero-spark spark-c"></div></div>
+            <div class="hero-art" aria-hidden="true">
+              <div class="orbit orbit-one"></div>
+              <div class="orbit orbit-two"></div>
+              <div class="hero-disc"><div class="disc-center"></div></div>
+              <div class="hero-spark spark-a"></div>
+              <div class="hero-spark spark-b"></div>
+              <div class="hero-spark spark-c"></div>
+            </div>
           </div>
-          <div class="section-heading"><div><div class="eyebrow muted">PICKED FOR YOU</div><h2>Discover something new</h2></div><button class="text-button" id="refreshDiscover">Refresh <span data-icon="refresh"></span></button></div>
+          <div class="section-heading">
+            <div><div class="eyebrow muted">PICKED FOR YOU</div><h2>Discover something new</h2></div>
+            <button class="text-button" id="refreshDiscover">Refresh <span data-icon="refresh"></span></button>
+          </div>
           <div class="track-grid" id="discoverGrid"><div class="loading-state"><span class="loader"></span> Loading music previews…</div></div>
           <div class="section-heading section-gap"><div><div class="eyebrow muted">KEEP EXPLORING</div><h2>Popular searches</h2></div></div>
           <div class="topic-grid">
@@ -68,54 +84,120 @@
           </div>
         </section>
 
+        <!-- SEARCH -->
         <section class="view" id="view-search">
-          <div class="page-intro"><div class="eyebrow muted">THE WORLD OF MUSIC</div><h1>Search</h1><p>Search tracks, artists, and albums. Choose a result to play its available preview.</p></div>
-          <form class="large-search" id="pageSearch"><span data-icon="search"></span><input id="pageSearchInput" type="search" placeholder="Try an artist, song, or album…" autocomplete="off"><button class="primary-button" type="submit">Search</button></form>
-          <div class="section-heading"><h2 id="searchHeading">Start with a search</h2><span class="muted small" id="searchCount"></span></div>
+          <div class="page-intro">
+            <div class="eyebrow muted">THE WORLD OF MUSIC</div>
+            <h1>Search</h1>
+            <p>Search tracks, artists, and albums. Choose a result to play its available preview.</p>
+          </div>
+          <form class="large-search" id="pageSearch">
+            <span data-icon="search"></span>
+            <input id="pageSearchInput" type="search" placeholder="Try an artist, song, or album…" autocomplete="off">
+            <button class="primary-button" type="submit">Search</button>
+          </form>
+          <div class="section-heading">
+            <h2 id="searchHeading">Start with a search</h2>
+            <span class="muted small" id="searchCount"></span>
+          </div>
           <div class="track-grid" id="searchGrid"></div>
         </section>
 
+        <!-- CHARTS -->
         <section class="view" id="view-trending">
-          <div class="page-intro"><div class="eyebrow muted">WHAT PEOPLE ARE PLAYING</div><h1>Charts</h1><p>Popular songs from Apple's public music chart feed.</p></div>
-          <div class="filter-row"><label for="countrySelect">Region</label><select id="countrySelect"><option value="us">United States</option><option value="gb">United Kingdom</option><option value="in" selected>India</option><option value="jp">Japan</option><option value="ca">Canada</option><option value="au">Australia</option><option value="br">Brazil</option><option value="de">Germany</option></select><button class="secondary-button" id="loadCharts"><span data-icon="refresh"></span> Update charts</button></div>
+          <div class="page-intro">
+            <div class="eyebrow muted">WHAT PEOPLE ARE PLAYING</div>
+            <h1>Charts</h1>
+            <p>Popular songs from public music chart feeds.</p>
+          </div>
+          <div class="filter-row">
+            <label for="countrySelect">Region</label>
+            <select id="countrySelect">
+              <option value="us">United States</option>
+              <option value="gb">United Kingdom</option>
+              <option value="in" selected>India</option>
+              <option value="jp">Japan</option>
+              <option value="ca">Canada</option>
+              <option value="au">Australia</option>
+              <option value="br">Brazil</option>
+              <option value="de">Germany</option>
+            </select>
+            <button class="secondary-button" id="loadCharts"><span data-icon="refresh"></span> Update charts</button>
+          </div>
           <div class="track-grid" id="trendingGrid"><div class="loading-state"><span class="loader"></span> Loading charts…</div></div>
         </section>
 
+        <!-- LIBRARY -->
         <section class="view" id="view-library">
-          <div class="page-intro"><div class="eyebrow muted">SAVED ON THIS DEVICE</div><h1>Your Library</h1><p>Your saved tracks are stored in this browser, not in a cloud account.</p></div>
-          <div class="section-heading"><h2>Saved tracks</h2><span class="muted small" id="libraryCount">0 tracks</span></div>
+          <div class="page-intro">
+            <div class="eyebrow muted">SAVED ON THIS DEVICE</div>
+            <h1>Your Library</h1>
+            <p>Your saved tracks and client-cached items stay on your browser.</p>
+          </div>
+          <div class="section-heading">
+            <h2>Saved tracks</h2>
+            <span class="muted small" id="libraryCount">0 tracks</span>
+          </div>
           <div class="track-grid" id="libraryGrid"></div>
         </section>
 
+        <!-- PLAYLISTS -->
         <section class="view" id="view-playlists">
-          <div class="page-intro"><div class="eyebrow muted">YOUR COLLECTION</div><h1>Playlists</h1><p>Create playlists and add tracks from any music list.</p></div>
-          <form class="create-playlist" id="playlistForm"><input id="playlistName" maxlength="50" placeholder="New playlist name" aria-label="New playlist name" required><button class="primary-button" type="submit"><span data-icon="plus"></span> Create playlist</button></form>
+          <div class="page-intro">
+            <div class="eyebrow muted">YOUR COLLECTION</div>
+            <h1>Playlists</h1>
+            <p>Create playlists and add tracks from any music list.</p>
+          </div>
+          <form class="create-playlist" id="playlistForm">
+            <input id="playlistName" maxlength="50" placeholder="New playlist name" aria-label="New playlist name" required>
+            <button class="primary-button" type="submit"><span data-icon="plus"></span> Create playlist</button>
+          </form>
           <div id="playlistList" class="playlist-list"></div>
         </section>
 
+        <!-- QUEUE -->
         <section class="view" id="view-queue">
-          <div class="page-intro"><div class="eyebrow muted">COMING UP</div><h1>Up Next</h1><p>Manage the tracks waiting to play.</p></div>
-          <div class="section-heading"><h2>Queue</h2><button class="text-button" id="clearQueue">Clear queue</button></div>
+          <div class="page-intro">
+            <div class="eyebrow muted">COMING UP</div>
+            <h1>Up Next</h1>
+            <p>Manage the tracks waiting to play.</p>
+          </div>
+          <div class="section-heading">
+            <h2>Queue</h2>
+            <button class="text-button" id="clearQueue">Clear queue</button>
+          </div>
           <div class="track-grid" id="queueGrid"></div>
         </section>
 
+        <!-- EQUALIZER -->
         <section class="view" id="view-equalizer">
-          <div class="page-intro"><div class="eyebrow muted">TUNE YOUR SOUND</div><h1>Equalizer</h1><p>Adjust the sound of the current preview. Browser support may vary by device.</p></div>
+          <div class="page-intro">
+            <div class="eyebrow muted">TUNE YOUR SOUND</div>
+            <h1>Equalizer</h1>
+            <p>Adjust the sound of the current preview. Browser support may vary by device.</p>
+          </div>
           <div class="eq-panel">
-            <div class="eq-header"><div><h2>Custom EQ</h2><p class="muted">Changes apply while the Web Audio engine is active.</p></div><button class="secondary-button" id="resetEQ">Reset</button></div>
+            <div class="eq-header">
+              <div>
+                <h2>Custom EQ</h2>
+                <p class="muted">Changes apply while audio playback is active.</p>
+              </div>
+              <button class="secondary-button" id="resetEQ">Reset</button>
+            </div>
             <div class="eq-sliders">
               <label class="eq-control"><span>Bass <b id="bassValue">0 dB</b></span><input id="bass" type="range" min="-12" max="12" value="0"><small>LOW</small></label>
               <label class="eq-control"><span>Mid <b id="midValue">0 dB</b></span><input id="mid" type="range" min="-12" max="12" value="0"><small>MID</small></label>
               <label class="eq-control"><span>Treble <b id="trebleValue">0 dB</b></span><input id="treble" type="range" min="-12" max="12" value="0"><small>HIGH</small></label>
             </div>
-            <p class="muted small">Some mobile browsers require you to tap Play before audio processing can start.</p>
+            <p class="muted small">Tap Play on a track before changing equalizers to initialize audio filters.</p>
           </div>
         </section>
       </section>
     </main>
   </div>
 
-  <footer class="player">
+  <!-- PERSISTENT FOOTER DOCK (HIDDEN UNTIL PLAYING) -->
+  <footer class="player" id="playerBar">
     <div class="now-playing">
       <img id="playerArt" src="assets/cover.svg" alt="" class="player-art">
       <div class="now-meta"><strong id="playerTitle">Choose a track</strong><span id="playerArtist">Astra Audio</span></div>
@@ -129,13 +211,32 @@
         <button class="icon-button control-button" id="nextButton" aria-label="Next track"><span data-icon="next"></span></button>
         <button class="icon-button control-button" id="repeatButton" aria-label="Repeat queue" title="Repeat"><span data-icon="repeat"></span></button>
       </div>
-      <div class="seek-row"><span id="currentTime">0:00</span><input id="seekBar" type="range" min="0" max="30" step=".1" value="0" aria-label="Seek"><span id="durationTime">0:30</span></div>
+      <div class="seek-row">
+        <span id="currentTime">0:00</span>
+        <input id="seekBar" type="range" min="0" max="30" step=".1" value="0" aria-label="Seek">
+        <span id="durationTime">0:30</span>
+      </div>
     </div>
-    <div class="player-right"><span data-icon="volume"></span><input id="volumeBar" type="range" min="0" max="1" step=".05" value=".8" aria-label="Volume"><button class="icon-button queue-open" id="openQueue" aria-label="Open queue"><span data-icon="queue"></span></button></div>
+    <div class="player-right">
+      <span data-icon="volume"></span>
+      <input id="volumeBar" type="range" min="0" max="1" step=".05" value=".8" aria-label="Volume">
+      <button class="icon-button queue-open" id="openQueue" aria-label="Open queue"><span data-icon="queue"></span></button>
+    </div>
     <audio id="audio" preload="none" crossorigin="anonymous"></audio>
   </footer>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="icon-button modal-close" id="modalClose" aria-label="Close"><span data-icon="close"></span></button><h2 id="modalTitle">About Astra Audio</h2><p>Astra Audio is a static website made for GitHub Pages. It uses Apple's public iTunes Search and RSS chart endpoints to find music and play the preview URLs supplied by the provider.</p><p>Previews are usually short samples, not full songs. Availability varies by track and country. Your saved library and playlists stay in this browser. No server or API key is required for this preview-based version.</p><button class="primary-button" id="modalOk">Got it</button></div></div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="icon-button modal-close" id="modalClose" aria-label="Close"><span data-icon="close"></span></button>
+      <h2 id="modalTitle">About Astra Audio</h2>
+      <p>Astra Audio is built for static deployment on GitHub Pages. It features official music feeds, instant playback caching, audio equalizer, and responsive touch controls.</p>
+      <p>All library items, history, and preferences are stored strictly inside your browser's local cache.</p>
+      <button class="primary-button" id="modalOk">Got it</button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
