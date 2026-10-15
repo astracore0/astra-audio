@@ -994,7 +994,7 @@
         }
       });
 
-      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const dedupe = arr => [...new Map(arr.filter(t => t && t.id).map(t => [String(t.id), t])).values()];
 
       function fmt(n) {
         if (!Number.isFinite(n) || n < 0) return '0:00';
